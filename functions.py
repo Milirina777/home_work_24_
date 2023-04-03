@@ -1,9 +1,14 @@
 from constants import LOG_DIR
-from typing import List, Iterable, Union, Any
 import re
 
+def data_():
+    """Формирует массив с данными"""
+    with open(LOG_DIR) as f:
+        data = map(lambda v: v.strip(), f)
+        return list(data)
 
-def mapping(colomn_: Any, data: Iterable[str] = None):
+
+def mapping(colomn_: str, data: list[str]):
     """Возвращает по номеру колонки требуемую колонку из массива"""
     if data is None:
         data = data_()
@@ -12,7 +17,7 @@ def mapping(colomn_: Any, data: Iterable[str] = None):
     return list(map(lambda row: row.split(' ')[colomn_], data))
 
 
-def filter_(str_: Any, data: Iterable[str] = None):
+def filter_(str_: str, data: list[str]):
     """Возвращает строки по вводимому значению с этим значением"""
     if data is None:
         data = data_()
@@ -20,7 +25,7 @@ def filter_(str_: Any, data: Iterable[str] = None):
     return list(filter(lambda row: row if str_ in row else None, data))
 
 
-def unique_(data: Iterable[str]):
+def unique_(parametr_, data: list[str]):
     """Возвращает массив с уникальными значениями"""
     result = []
     seen = set()
@@ -33,20 +38,22 @@ def unique_(data: Iterable[str]):
     return result
 
 
-def sorted_(asc: Any, data: Iterable[str] = None):
+def sorted_(asc: str, data: list[str]):
     """Сортирует массив"""
     if data is None:
         data = data_()
     if asc == 'asc':
-        return sorted(data)
-    elif asc == 'desc':
-        return sorted(data, reverse=True)
+        res = True
+    else:
+        res = False
+    return sorted(data, reverse=res)
 
 
-def limited_(value: Any, data: Iterable[str] = None):
+def limited_(value: str, data: list[str]):
     """Лимитирует вывод данных с массива"""
     if data is None:
         data = data_()
+
     value = int(value)
     counter = 0
     result = []
@@ -63,16 +70,37 @@ def limited_(value: Any, data: Iterable[str] = None):
 FILE_NAME = './apache_logs.txt'
 
 
-def data_():
-    """Формирует массив с данными"""
-    with open(LOG_DIR) as f:
-        data = map(lambda v: v.strip(), f)
-        return list(data)
-
-def regex_(reg: Union[str, int], data: Iterable[str] = None):
+def regex_(reg: str, data: list[str]):
     """Возвращает строки со значениями массива"""
     if data is None:
         data = data_()
-    regex = re.compile(fr"{reg}")
-    result: List[str] = [i for i in data if regex.search(i)]
+    if 'png' in reg:
+        regex_reg = 'images\/\S*\.png'
+    else:
+        raise ValueError
+
+    regex = re.compile(regex_reg)
+    result = []
+    for line in data:
+        item = regex.findall(line)
+        if item:
+            result.append(line)
     return result
+
+
+def get_query(cmd: str, parametr_, data=None):
+    if cmd == 'filter':
+        return filter_(parametr_=parametr_, data=data)
+    elif cmd == 'limit':
+        return limited_(parametr_=parametr_, data=data)
+    elif cmd == 'map':
+        return mapping(parametr_=parametr_, data=data)
+    elif cmd == 'sort':
+        return sorted_(parametr_=parametr_, data=data)
+    elif cmd == 'unique':
+        return unique_(parametr_=parametr_, data=data)
+    elif cmd == "regex":
+        try:
+            return regex_(parametr_=parametr_, data=data)
+        except ValueError as e:
+            print('Ошибка параметра regex')
