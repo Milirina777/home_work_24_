@@ -35,4 +35,4 @@ def perform_query():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=25000, debug=True)

@@ -1,106 +1,58 @@
-from constants import LOG_DIR
 import re
 
-def data_():
-    """Формирует массив с данными"""
-    with open(LOG_DIR) as f:
-        data = map(lambda v: v.strip(), f)
-        return list(data)
 
-
-def mapping(colomn_: str, data: list[str]):
+def mapping(str_: str, data: list[str]) -> list:
     """Возвращает по номеру колонки требуемую колонку из массива"""
-    if data is None:
-        data = data_()
-    colomn_ = int(colomn_)
+    coloum_ = int(str_)
+    if coloum_ == 0:
+        result = list(map(lambda x: x.split()[coloum_], data))
+    elif coloum_ == 1:
+        result = list(map(lambda x: x.split()[3] + x.split()[4], data))
+    elif coloum_ == 2:
+        result = list(map(lambda x: " ".join(x.split()[5:]), data))
 
-    return list(map(lambda row: row.split(' ')[colomn_], data))
+    return result
 
 
-def filter_(str_: str, data: list[str]):
+def filter_(str_: str, data: list[str]) -> list:
     """Возвращает строки по вводимому значению с этим значением"""
-    if data is None:
-        data = data_()
-
-    return list(filter(lambda row: row if str_ in row else None, data))
+    return list(filter(lambda x: str_ in x, data))
 
 
-def unique_(parametr_, data: list[str]):
+def unique_(str_: str, data: list[str]) -> list:
     """Возвращает массив с уникальными значениями"""
-    result = []
-    seen = set()
-    for row in data:
-        if row in seen:
-            continue
-        else:
-            result.append(row)
-            seen.add(row)
-    return result
+    return list(set(data))
 
 
-def sorted_(asc: str, data: list[str]):
+def sorted_(str_: str, data: list[str]) -> list:
     """Сортирует массив"""
-    if data is None:
-        data = data_()
-    if asc == 'asc':
-        res = True
-    else:
-        res = False
-    return sorted(data, reverse=res)
+    reverse = (str_ == 'desc')
+    return sorted(data, reverse=reverse)
 
 
-def limited_(value: str, data: list[str]):
+def limited_(str_: str, data: list[str]) -> list:
     """Лимитирует вывод данных с массива"""
-    if data is None:
-        data = data_()
+    return data[: int(str_)]
 
-    value = int(value)
-    counter = 0
-    result = []
-    while counter < value:
-        for i in data:
-            result.append(i)
-            counter += 1
-            if counter == value:
-                break
-
-    return result
-
-
-FILE_NAME = './apache_logs.txt'
-
-
-def regex_(reg: str, data: list[str]):
+def regex_(str_: str, data: list[str]) -> list:
     """Возвращает строки со значениями массива"""
-    if data is None:
-        data = data_()
-    if 'png' in reg:
-        regex_reg = 'images\/\S*\.png'
-    else:
-        raise ValueError
-
-    regex = re.compile(regex_reg)
-    result = []
-    for line in data:
-        item = regex.findall(line)
-        if item:
-            result.append(line)
-    return result
+    regex = re.compile(str_)
+    return list(filter(lambda v: re.search(regex, v), data))
 
 
-def get_query(cmd: str, parametr_, data=None):
+def get_query(cmd: str, str_: str, data: list[str]) -> list:
     if cmd == 'filter':
-        return filter_(parametr_=parametr_, data=data)
+        return filter_(str_=str_, data=data)
     elif cmd == 'limit':
-        return limited_(parametr_=parametr_, data=data)
+        return limited_(str_=str_, data=data)
     elif cmd == 'map':
-        return mapping(parametr_=parametr_, data=data)
+        return mapping(str_=str_, data=data)
     elif cmd == 'sort':
-        return sorted_(parametr_=parametr_, data=data)
+        return sorted_(str_=str_, data=data)
     elif cmd == 'unique':
-        return unique_(parametr_=parametr_, data=data)
+        return unique_(str_=str_, data=data)
     elif cmd == "regex":
         try:
-            return regex_(parametr_=parametr_, data=data)
+            return regex_(str_=str_, data=data)
         except ValueError as e:
             print('Ошибка параметра regex')
