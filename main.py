@@ -20,18 +20,18 @@ def perform_query():
     except ValidationError:
         return f'Запрос неверен', 500
 
-        values_cmd = ['sort', 'filter', 'limit', 'map', 'unique', 'regex']
-        try:
-            if data['cmd1'] not in values_cmd or data['cmd2'] not in values_cmd:
-                raise ValidationError
-        except ValidationError:
-            return f'Название cmd-функции введено некорректно', 500
+    values_cmd = ['sort', 'filter', 'limit', 'map', 'unique', 'regex']
+    try:
+        if data['cmd1'] not in values_cmd or data['cmd2'] not in values_cmd:
+            raise ValidationError
+    except ValidationError:
+        return f'Название cmd-функции введено некорректно', 500
 
-        with open(os.path.join(DATA_DIR, data['file_name'])) as result:
-            result = get_query(data['cmd1'], data['value1'], result)
-            result = get_query(data['cmd2'], data['value2'], result)
+    with open(os.path.join(DATA_DIR, data['file_name'])) as result:
+        result = get_query(data['cmd1'], data['value1'], result)
+        result = get_query(data['cmd2'], data['value2'], result)
 
-        return jsonify(result), 200
+    return jsonify(result), 200
 
 
 if __name__ == '__main__':
